@@ -25,50 +25,20 @@ public class MainActivity extends Activity
 	
 		textView = (TextView) findViewById(R.id.txt_user);
 		
-		
-		
-	//	try
-	//	{
-			//fazGet();
 		String url = "https://olinda.bcb.gov.br/olinda/servico/Informes_PostosDeAtendimentoEletronico/versao/v1/swagger-ui3#/";
 		String url2 = "https://olinda.bcb.gov.br/olinda/servico/Informes_PostosDeAtendimentoEletronico/versao/v1/odata/PostosAtendimentoEletronico";
 		
+		textView.setText(url2);
+		
 		new DownloadTask().execute(url2);
-	//	}
-		/*catch (IOException e)
-		{
-			System.out.println(e.getMessage());
-		}*/
+		
+		textView.append("depois do task");
+		
     }
 	
-	public void fazGet() throws IOException
-	{
-		String url = "http://example.com"; 
-		String charset = "UTF-8";
-		
-		
-		URLConnection connection = new URL(url).openConnection(); 
-		connection.setRequestProperty("Accept-Charset", charset); 
-		
-		try{
-		InputStream response = connection.getInputStream(); 
-		
-		//try (Scanner scanner = new Scanner(response)) 
-		//{ 
-		
-		Scanner scanner = new Scanner(response);
-		String responseBody = scanner.useDelimiter("\\A").next(); 
-		System.out.println(responseBody);
-		}
-		catch (IOException ioe)
-		{
-			
-			System.out.println(ioe);
-		}
-		
-	}
 	
-	private class DownloadTask extends AsyncTask<String, Void, String> 
+	
+	private class DownloadTask extends AsyncTask<String, String, String> 
 	{ 
 		protected String doInBackground(String... urls) 
 		{ 
@@ -76,42 +46,63 @@ public class MainActivity extends Activity
 			String result = null;
 			try 
 			{ 
+				textView.append("antes do request");
+				publishProgress("antes do request"); 
 				HttpRequest request = HttpRequest.get(urls[0]);
-				//File file = null;
+				
+				
+				
+					InputStream response = request.stream(); 
+
+				try (Scanner scanner = new Scanner(response)) 
+				{ 
+
+					String responseBody = scanner.useDelimiter("\\}").next(); 
+					System.out.println(responseBody);
+					result = responseBody;
+				}
+				/*catch (IOException ioe)
+				{
+
+					System.out.println(ioe);
+				}*/
+				
+				
+				
+				
+				/*
+				
 				if (request.ok()) 
 				{ 
-				/*	try
-					{
-						file = File.createTempFile("download", ".tmp");
-					}
-					catch (IOException e)
-					{}
-
-					*/
-					
 					result = request.body();
-					
-					//textView.setText(result);
-
-					//request.receive(file); 
-
-					publishProgress(); 
-
+					textView.append(result);
+					Log.w("MyApp",result);	
+					publishProgress("request ok"); 
 				}
 				else
+				{
+						
+					textView.append("request nao ok");
+					publishProgress("request nao ok"); 
+					Log.w("MyApp",request.message());		
 					return null;
+				}
+					*/
 					
 				return result; 
 				
 			} catch (HttpRequestException exception) 
 			{ 
+				
+				publishProgress("exception"); 
+				Log.w("MyApp", exception.getCause().getMessage());
 				return null; 
 			} 
 		} 
-		protected void onProgressUpdate() 
+		protected void onProgressUpdate(String msg) 
 		{ 
-			//Log.d("MyApp", "Downloaded bytes: " + progress[0]); 
-			textView.setText("aguarde"); 
+			Log.w("MyApp", msg); 
+			textView.append(msg); 
 
 		} 
 
@@ -120,36 +111,12 @@ public class MainActivity extends Activity
 			if (result != null)
 			{
 				
-				textView.setText(result);
+				textView.append(result);
 				
-				//
-			//	postoAtArray = new ArrayList<PostoAt>;
-				
-				/* try
-				{
-					JSONObject myjson = new JSONObject(result);
-					JSONArray the_json_array = myjson.getJSONArray("PostosAtendimentoEletronico");
-			
-					int size = the_json_array.length();
-					
-					for(int i =0;i < size ; i++)
-					{
-						//PostoAt postoAt = new PostoAt();
-						 the_json_array.get(i);
-					}
-					
-					
-				}
-				catch (JSONException e)
-				{}
-				
-				*/
-				
-				
-				Log.d("MyApp", result);
+				Log.w("MyApp", result);
 			}
 			else 
-				Log.d("MyApp", "Download failed");
+				Log.w("MyApp", "Download failed");
 
 		}
 	}
@@ -205,6 +172,32 @@ public class MainActivity extends Activity
 				}
 	}		*/
 	
-	
+	/*
+	public void fazGet() throws IOException
+	{
+		String url = "http://example.com"; 
+		String charset = "UTF-8";
+
+
+		URLConnection connection = new URL(url).openConnection(); 
+		connection.setRequestProperty("Accept-Charset", charset); 
+
+		try{
+			InputStream response = connection.getInputStream(); 
+
+			//try (Scanner scanner = new Scanner(response)) 
+			//{ 
+
+			Scanner scanner = new Scanner(response);
+			String responseBody = scanner.useDelimiter("\\A").next(); 
+			System.out.println(responseBody);
+		}
+		catch (IOException ioe)
+		{
+
+			System.out.println(ioe);
+		}
+
+	} */
 	
 }
