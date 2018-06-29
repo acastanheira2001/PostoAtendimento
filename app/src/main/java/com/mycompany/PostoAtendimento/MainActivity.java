@@ -9,7 +9,7 @@ import com.github.kevinsawicki.http.HttpRequest.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import org.json.*;
+import android.view.ViewDebug.*;
 
 
 public class MainActivity extends Activity 
@@ -23,22 +23,30 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 	
-		textView = (TextView) findViewById(R.id.txt_user);
+		ScrollView sv = (ScrollView) findViewById(R.id.SCROLLER_ID);
+		textView = (TextView) sv.findViewById(R.id.txt_user);
+		
+		
+		//textView = (TextView) findViewById(R.id.txt_user);
 		
 		String url = "https://olinda.bcb.gov.br/olinda/servico/Informes_PostosDeAtendimentoEletronico/versao/v1/swagger-ui3#/";
 		String url2 = "https://olinda.bcb.gov.br/olinda/servico/Informes_PostosDeAtendimentoEletronico/versao/v1/odata/PostosAtendimentoEletronico";
 		
-		textView.setText(url2);
+		//?NomeIf=\"BANCO DO BRASIL S.A.\" 
+		
+		
+		
+	//	textView.setText(url2);
 		
 		new DownloadTask().execute(url2);
 		
-		textView.append("depois do task");
+	//	textView.append("depois do task");
 		
     }
 	
 	
 	
-	private class DownloadTask extends AsyncTask<String, String, String> 
+	private class DownloadTask extends AsyncTask<String, Integer, String> 
 	{ 
 		protected String doInBackground(String... urls) 
 		{ 
@@ -46,20 +54,50 @@ public class MainActivity extends Activity
 			String result = null;
 			try 
 			{ 
-				textView.append("antes do request");
-				publishProgress("antes do request"); 
+				//textView.append("antes do request");
+			//	publishProgress(0); 
 				HttpRequest request = HttpRequest.get(urls[0]);
 				
-				
-				
-					InputStream response = request.stream(); 
+				InputStream response = request.stream(); 
+				String responseBody;
 
+				int i = 0;
 				try (Scanner scanner = new Scanner(response)) 
 				{ 
 
-					String responseBody = scanner.useDelimiter("\\}").next(); 
-					System.out.println(responseBody);
-					result = responseBody;
+					scanner.useDelimiter(".\\}");
+						
+					while(scanner.hasNext()){
+						i++;
+						
+						//if(i%4 == 0)
+							//publishProgress(i);
+							
+					//	{
+							/*try
+							{
+								Thread.sleep(2000);
+							}
+							catch (InterruptedException e)
+							{
+								Log.e("MyApp",e.getMessage());
+								break;
+							}*/
+							
+							
+						//}
+						responseBody = scanner.next(); 
+						//System.out.println(responseBody);
+					//	textView.append(responseBody);
+						result = result + responseBody;
+							
+						if(i==10)
+							break;
+					}
+					// closing the scanner stream
+					scanner.close();
+					
+					
 				}
 				/*catch (IOException ioe)
 				{
@@ -94,15 +132,16 @@ public class MainActivity extends Activity
 			} catch (HttpRequestException exception) 
 			{ 
 				
-				publishProgress("exception"); 
+				//publishProgress(-1); 
 				Log.w("MyApp", exception.getCause().getMessage());
 				return null; 
 			} 
 		} 
-		protected void onProgressUpdate(String msg) 
+		protected void onProgressUpdate(Integer...values) 
 		{ 
-			Log.w("MyApp", msg); 
-			textView.append(msg); 
+			
+			Log.w("MyApp",Integer.toString(values[0])); 
+	//		textView.setText(values[0]); 
 
 		} 
 
@@ -111,7 +150,7 @@ public class MainActivity extends Activity
 			if (result != null)
 			{
 				
-				textView.append(result);
+				textView.setText(result);
 				
 				Log.w("MyApp", result);
 			}
